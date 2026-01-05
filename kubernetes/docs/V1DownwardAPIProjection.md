@@ -1,8 +1,18 @@
 # Kubernetes::V1DownwardAPIProjection
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**items** | [**Array&lt;V1DownwardAPIVolumeFile&gt;**](V1DownwardAPIVolumeFile.md) | Items is a list of DownwardAPIVolume file | [optional] 
 
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **items** | [**Array&lt;V1DownwardAPIVolumeFile&gt;**](V1DownwardAPIVolumeFile.md) | Items is a list of DownwardAPIVolume file | [optional] |
+
+## Example
+
+```ruby
+require 'kubernetes'
+
+instance = Kubernetes::V1DownwardAPIProjection.new(
+  items: null
+)
+```
 

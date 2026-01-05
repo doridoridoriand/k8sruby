@@ -1,0 +1,20 @@
+# Kubernetes::V1alpha1ParamKind
+
+## Properties
+
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **api_version** | **String** | APIVersion is the API group version the resources belong to. In format of \&quot;group/version\&quot;. Required. | [optional] |
+| **kind** | **String** | Kind is the API kind the resources belong to. Required. | [optional] |
+
+## Example
+
+```ruby
+require 'kubernetes'
+
+instance = Kubernetes::V1alpha1ParamKind.new(
+  api_version: null,
+  kind: null
+)
+```
+

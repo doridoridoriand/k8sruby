@@ -1,42 +1,64 @@
 # Kubernetes::ApisApi
 
-All URIs are relative to *https://localhost*
+All URIs are relative to *http://localhost*
 
-Method | HTTP request | Description
-------------- | ------------- | -------------
-[**get_api_versions**](ApisApi.md#get_api_versions) | **GET** /apis/ | 
+| Method | HTTP request | Description |
+| ------ | ------------ | ----------- |
+| [**get_api_versions**](ApisApi.md#get_api_versions) | **GET** /apis/ |  |
 
 
-# **get_api_versions**
-> V1APIGroupList get_api_versions
+## get_api_versions
+
+> <V1APIGroupList> get_api_versions
 
 
 
 get available API versions
 
-### Example
+### Examples
+
 ```ruby
-# load the gem
+require 'time'
 require 'kubernetes'
 # setup authorization
 Kubernetes.configure do |config|
   # Configure API key authorization: BearerToken
-  config.api_key['authorization'] = 'YOUR API KEY'
+  config.api_key['BearerToken'] = 'YOUR API KEY'
   # Uncomment the following line to set a prefix for the API key, e.g. 'Bearer' (defaults to nil)
-  #config.api_key_prefix['authorization'] = 'Bearer'
+  # config.api_key_prefix['BearerToken'] = 'Bearer'
 end
 
 api_instance = Kubernetes::ApisApi.new
 
 begin
+  
   result = api_instance.get_api_versions
   p result
 rescue Kubernetes::ApiError => e
-  puts "Exception when calling ApisApi->get_api_versions: #{e}"
+  puts "Error when calling ApisApi->get_api_versions: #{e}"
+end
+```
+
+#### Using the get_api_versions_with_http_info variant
+
+This returns an Array which contains the response data, status code and headers.
+
+> <Array(<V1APIGroupList>, Integer, Hash)> get_api_versions_with_http_info
+
+```ruby
+begin
+  
+  data, status_code, headers = api_instance.get_api_versions_with_http_info
+  p status_code # => 2xx
+  p headers # => { ... }
+  p data # => <V1APIGroupList>
+rescue Kubernetes::ApiError => e
+  puts "Error when calling ApisApi->get_api_versions_with_http_info: #{e}"
 end
 ```
 
 ### Parameters
+
 This endpoint does not need any parameter.
 
 ### Return type
@@ -49,8 +71,6 @@ This endpoint does not need any parameter.
 
 ### HTTP request headers
 
- - **Content-Type**: application/json, application/yaml, application/vnd.kubernetes.protobuf
- - **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
-
-
+- **Content-Type**: Not defined
+- **Accept**: application/json, application/yaml, application/vnd.kubernetes.protobuf
 

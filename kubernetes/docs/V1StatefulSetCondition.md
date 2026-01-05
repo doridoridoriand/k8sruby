@@ -1,12 +1,26 @@
 # Kubernetes::V1StatefulSetCondition
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**last_transition_time** | **DateTime** | Last time the condition transitioned from one status to another. | [optional] 
-**message** | **String** | A human readable message indicating details about the transition. | [optional] 
-**reason** | **String** | The reason for the condition&#39;s last transition. | [optional] 
-**status** | **String** | Status of the condition, one of True, False, Unknown. | 
-**type** | **String** | Type of statefulset condition. | 
 
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **last_transition_time** | **Time** | Last time the condition transitioned from one status to another. | [optional] |
+| **message** | **String** | A human readable message indicating details about the transition. | [optional] |
+| **reason** | **String** | The reason for the condition&#39;s last transition. | [optional] |
+| **status** | **String** | Status of the condition, one of True, False, Unknown. |  |
+| **type** | **String** | Type of statefulset condition. |  |
+
+## Example
+
+```ruby
+require 'kubernetes'
+
+instance = Kubernetes::V1StatefulSetCondition.new(
+  last_transition_time: null,
+  message: null,
+  reason: null,
+  status: null,
+  type: null
+)
+```
 

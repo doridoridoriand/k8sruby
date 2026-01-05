@@ -1,8 +1,18 @@
 # Kubernetes::V1NodeConfigSource
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**config_map** | [**V1ConfigMapNodeConfigSource**](V1ConfigMapNodeConfigSource.md) | ConfigMap is a reference to a Node&#39;s ConfigMap | [optional] 
 
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **config_map** | [**V1ConfigMapNodeConfigSource**](V1ConfigMapNodeConfigSource.md) |  | [optional] |
+
+## Example
+
+```ruby
+require 'kubernetes'
+
+instance = Kubernetes::V1NodeConfigSource.new(
+  config_map: null
+)
+```
 

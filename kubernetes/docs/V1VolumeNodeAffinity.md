@@ -1,8 +1,18 @@
 # Kubernetes::V1VolumeNodeAffinity
 
 ## Properties
-Name | Type | Description | Notes
------------- | ------------- | ------------- | -------------
-**required** | [**V1NodeSelector**](V1NodeSelector.md) | Required specifies hard node constraints that must be met. | [optional] 
 
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **required** | [**V1NodeSelector**](V1NodeSelector.md) |  | [optional] |
+
+## Example
+
+```ruby
+require 'kubernetes'
+
+instance = Kubernetes::V1VolumeNodeAffinity.new(
+  required: null
+)
+```
 

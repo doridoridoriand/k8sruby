@@ -9,6 +9,7 @@
 - **バージョン**: 1.31.0
 - **対応Kubernetes API**: release-1.31
 - **メンテナンス状況**: アクティブ（コミュニティメンテナンス）
+- **最終更新日**: 2026年1月18日
 
 このクライアントは、Pod、Service、Deployment、ConfigMapなどのKubernetesリソースの作成、読み取り、更新、削除（CRUD操作）をRubyから実行できます。
 
@@ -30,7 +31,7 @@
 
 2026年1月、このリポジトリは独立したプロジェクトとして復活しました：
 
-- **2026年1月5日**: Kubernetes 1.31対応として再生成
+- **2026年1月18日**: Kubernetes 1.31対応として再生成
 - **リポジトリ**: [github.com/doridoridoriand/k8sruby](https://github.com/doridoridoriand/k8sruby)
 - **方針**: コミュニティ主導でメンテナンスを継続
 
@@ -43,7 +44,7 @@
 
 - **対応バージョン**: Kubernetes release-1.31
 - **クライアントバージョン**: 1.31.0
-- **最終更新日**: 2026年1月5日
+- **最終更新日**: 2026年1月18日
 
 このクライアントは、Kubernetes 1.31のすべてのAPIリソースとエンドポイントに対応しています。
 
@@ -430,9 +431,9 @@ bundle exec rspec spec/path/to/spec_file.rb
 
 ### 参考リンク
 
-- **Kubernetes API リファレンス**: https://kubernetes.io/docs/reference/kubernetes-api/
-- **OpenAPI Generator**: https://openapi-generator.tech/
-- **Kubernetes Client 生成ツール**: https://github.com/kubernetes-client/gen
+- **Kubernetes API リファレンス**: [https://kubernetes.io/docs/reference/kubernetes-api/](https://kubernetes.io/docs/reference/kubernetes-api/)
+- **OpenAPI Generator**: [https://openapi-generator.tech/](https://openapi-generator.tech/)
+- **Kubernetes Client 生成ツール**: [https://github.com/kubernetes-client/gen](https://github.com/kubernetes-client/gen)
 
 ---
 
@@ -443,4 +444,4 @@ bundle exec rspec spec/path/to/spec_file.rb
 ## サポート
 
 質問や問題がある場合は、GitHubのIssuesで報告してください：
-https://github.com/doridoridoriand/k8sruby/issues
+[https://github.com/doridoridoriand/k8sruby/issues](https://github.com/doridoridoriand/k8sruby/issues)

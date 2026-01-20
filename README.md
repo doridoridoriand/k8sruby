@@ -2,6 +2,20 @@
 
 Ruby client for the [kubernetes](http://kubernetes.io/) API.
 
+## Compatibility Matrix
+
+| Kubernetes version | Kubernetes API (OpenAPI) | Client gem version |
+| --- | --- | --- |
+| 1.27 | release-1.31 | 1.31.0 |
+| 1.28 | release-1.31 | 1.31.0 |
+| 1.29 | release-1.31 | 1.31.0 |
+| 1.30 | release-1.31 | 1.31.0 |
+| 1.31 | release-1.31 | 1.31.0 |
+
+## Requirements
+
+- Ruby 3.3.0+
+
 ## Usage
 ```ruby
 require 'kubernetes'

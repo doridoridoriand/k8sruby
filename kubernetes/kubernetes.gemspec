@@ -25,13 +25,16 @@ Gem::Specification.new do |s|
   s.summary     = "Kubernetes ruby client."
   s.description = "Kubernetes official ruby client to talk to kubernetes clusters."
   s.license     = "Apache V2"
-  s.required_ruby_version = ">= 2.4"
+  s.required_ruby_version = ">= 3.3.0"
 
   s.add_runtime_dependency 'typhoeus', '~> 1.0', '>= 1.0.1'
+  s.add_runtime_dependency 'base64', '~> 0.2'
 
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
-  s.files         = `find *`.split("\n").uniq.sort.select { |f| !f.empty? }
+  s.files         = `find *`.split("\n").uniq.sort.select do |f|
+    !f.empty? && !f.end_with?('.gem')
+  end
   s.test_files    = `find spec/*`.split("\n")
   s.executables   = []
   s.require_paths = ["lib"]

@@ -14,6 +14,7 @@
 
 require 'kubernetes/config/incluster_config'
 require 'kubernetes/config/kube_config'
+require 'rubygems/version'
 
 # The Kubernetes module encapsulates the Kubernetes client for Ruby
 module Kubernetes
@@ -86,7 +87,37 @@ module Kubernetes
     @temp_files = {}
   end
 
+  SUPPORTED_KUBERNETES_VERSION_RANGE = (
+    Gem::Version.new('1.27.0')..Gem::Version.new('1.31.999')
+  )
+
+  def supported_kubernetes_versions
+    %w[1.27 1.28 1.29 1.30 1.31].freeze
+  end
+
+  def normalize_kubernetes_version(version)
+    return nil if version.nil?
+
+    cleaned = version.to_s.strip
+    cleaned = cleaned.sub(/\Av/i, '')
+    cleaned = cleaned.split('+', 2).first
+    cleaned = cleaned.split('-', 2).first
+
+    Gem::Version.new(cleaned)
+  rescue ArgumentError
+    nil
+  end
+
+  def kubernetes_version_compatible?(version)
+    parsed = normalize_kubernetes_version(version)
+    return false unless parsed
+
+    SUPPORTED_KUBERNETES_VERSION_RANGE.cover?(parsed)
+  end
+
   module_function :new_client_from_config, :load_incluster_config,
                   :load_kube_config, :create_temp_file_and_set,
-                  :create_temp_file_with_base64content, :clear_temp_files
+                  :create_temp_file_with_base64content, :clear_temp_files,
+                  :supported_kubernetes_versions, :normalize_kubernetes_version,
+                  :kubernetes_version_compatible?
 end

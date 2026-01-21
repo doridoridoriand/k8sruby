@@ -25,6 +25,7 @@ describe 'WatchClient' do
     config.scheme = 'http'
     config.host = 'k8s.io:8080'
     client = Kubernetes::ApiClient.new(config)
+    user_agent = client.default_headers['User-Agent']
     url = 'http://k8s.io:8080/some/path?watch=true&resourceVersion=foo'
 
     WebMock.stub_request(:get, url)
@@ -33,7 +34,7 @@ describe 'WatchClient' do
                'Authorization' => '',
                'Content-Type' => 'application/json',
                'Expect' => '',
-               'User-Agent' => 'Swagger-Codegen/1.0.0-alpha2/ruby'
+               'User-Agent' => user_agent
              }
            )
            .to_return(status: 200, body: "{}\n", headers: {})
@@ -50,6 +51,7 @@ describe 'WatchClient' do
     config.scheme = 'http'
     config.host = 'k8s.io:8080'
     client = Kubernetes::ApiClient.new(config)
+    user_agent = client.default_headers['User-Agent']
     body = "{ \"foo\": \"bar\" }\n{ \"baz\": \"blah\" }\n{}\n"
 
     WebMock.stub_request(:get, 'http://k8s.io:8080/some/path?watch=true')
@@ -58,7 +60,7 @@ describe 'WatchClient' do
                'Authorization' => '',
                'Content-Type' => 'application/json',
                'Expect' => '',
-               'User-Agent' => 'Swagger-Codegen/1.0.0-alpha2/ruby'
+               'User-Agent' => user_agent
              }
            )
            .to_return(status: 200, body: body, headers: {})

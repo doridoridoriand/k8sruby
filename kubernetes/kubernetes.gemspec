@@ -19,19 +19,21 @@ Gem::Specification.new do |s|
   s.name        = "kubernetes"
   s.version     = Kubernetes::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Kubernetes authors"]
-  s.email       = ["kubernetes-sig-api-machinery@googlegroups.com"]
-  s.homepage    = "https://kubernetes.io"
-  s.summary     = "Kubernetes ruby client."
-  s.description = "Kubernetes official ruby client to talk to kubernetes clusters."
-  s.license     = "Apache V2"
-  s.required_ruby_version = ">= 2.4"
+  s.authors     = ["doridoridoriand"]
+  s.homepage    = "https://github.com/doridoridoriand/k8sruby"
+  s.summary     = "Kubernetes community ruby client."
+  s.description = "Kubernetes ruby client forked from Kubernetes official client."
+  s.license     = "Apache-2.0"
+  s.required_ruby_version = ">= 3.3.0"
 
   s.add_runtime_dependency 'typhoeus', '~> 1.0', '>= 1.0.1'
+  s.add_runtime_dependency 'base64', '~> 0.2'
 
   s.add_development_dependency 'rspec', '~> 3.6', '>= 3.6.0'
 
-  s.files         = `find *`.split("\n").uniq.sort.select { |f| !f.empty? }
+  s.files         = `find *`.split("\n").uniq.sort.select do |f|
+    !f.empty? && !f.end_with?('.gem')
+  end
   s.test_files    = `find spec/*`.split("\n")
   s.executables   = []
   s.require_paths = ["lib"]

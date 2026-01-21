@@ -112,4 +112,22 @@ describe Kubernetes do
       end
     end
   end
+
+  describe '.kubernetes_version_compatible?' do
+    it 'accepts supported Kubernetes versions' do
+      %w[v1.27.0 1.28.5 1.29.3+build 1.30.0-alpha.1 1.31.0].each do |v|
+        expect(Kubernetes.kubernetes_version_compatible?(v)).to be(true)
+      end
+    end
+
+    it 'rejects unsupported Kubernetes versions' do
+      %w[1.26.9 1.32.0 v2.0.0 invalid].each do |v|
+        expect(Kubernetes.kubernetes_version_compatible?(v)).to be(false)
+      end
+    end
+
+    it 'returns nil for invalid version parsing' do
+      expect(Kubernetes.normalize_kubernetes_version('invalid')).to be_nil
+    end
+  end
 end

@@ -49,6 +49,10 @@ to update the client clone the `gen` repo and run this command at the root of th
 ${GEN_REPO_BASE}/openapi/ruby.sh kubernetes settings
 ```
 
+For a full, repeatable upgrade workflow (including verification and troubleshooting), see:
+
+- [docs/kubernetes-version-upgrade.md](docs/kubernetes-version-upgrade.md)
+
 ## License
 
 This program follows the Apache License version 2.0 (http://www.apache.org/licenses/ ).  See LICENSE file included with the distribution for details.

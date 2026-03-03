@@ -115,13 +115,13 @@ describe Kubernetes do
 
   describe '.kubernetes_version_compatible?' do
     it 'accepts supported Kubernetes versions' do
-      %w[v1.27.0 1.28.5 1.29.3+build 1.30.0-alpha.1 1.31.0].each do |v|
+      %w[v1.31.0 1.32.5 1.33.3+build 1.34.0-alpha.1 1.35.0].each do |v|
         expect(Kubernetes.kubernetes_version_compatible?(v)).to be(true)
       end
     end
 
     it 'rejects unsupported Kubernetes versions' do
-      %w[1.26.9 1.32.0 v2.0.0 invalid].each do |v|
+      %w[1.30.9 1.36.0 v2.0.0 invalid].each do |v|
         expect(Kubernetes.kubernetes_version_compatible?(v)).to be(false)
       end
     end

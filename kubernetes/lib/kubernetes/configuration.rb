@@ -10,6 +10,8 @@ OpenAPI Generator version: 5.1.0
 
 =end
 
+require 'logger'
+
 module Kubernetes
   class Configuration
     # Defines url scheme
@@ -141,7 +143,7 @@ module Kubernetes
       @scheme = 'http'
       @host = 'localhost'
       @base_path = ''
-      @server_index = 0
+      @server_index = nil
       @server_operation_index = {}
       @server_variables = {}
       @server_operation_variables = {}
@@ -165,6 +167,11 @@ module Kubernetes
     # The default Configuration object.
     def self.default
       @@default ||= Configuration.new
+    end
+
+    # Backward-compatible alias used by examples and older integrations.
+    def self.default_config
+      default
     end
 
     def configure

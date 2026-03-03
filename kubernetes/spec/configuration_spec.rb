@@ -39,4 +39,10 @@ describe Kubernetes::Configuration do
       end
     end
   end
+
+  describe '.default_config' do
+    it 'returns a configuration object' do
+      expect(Kubernetes::Configuration.default_config).to be_a(Kubernetes::Configuration)
+    end
+  end
 end

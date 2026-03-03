@@ -2,6 +2,16 @@
 
 Ruby client for the [kubernetes](http://kubernetes.io/) API.
 
+## Project Background
+
+- This project is forked from the original Kubernetes Ruby client codebase after official maintenance had effectively stalled.
+- It is now maintained as a community-driven fork to keep pace with current Kubernetes API versions.
+
+## Generation Policy
+
+- Like other official Kubernetes clients, this client is generated from Kubernetes OpenAPI specifications.
+- Code generation is performed with OpenAPI Generator, and the generated client is versioned to the target Kubernetes OpenAPI release.
+
 ## Compatibility Matrix
 
 | Kubernetes version | Kubernetes API (OpenAPI) | Client gem version |

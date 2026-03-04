@@ -1,3 +1,5 @@
-# Kubernetes Community Code of Conduct
+# Code of Conduct
 
-Please refer to our [Kubernetes Community Code of Conduct](https://git.k8s.io/community/code-of-conduct.md).
+This file is kept for backward compatibility.
+
+Please see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).

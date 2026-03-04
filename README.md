@@ -59,7 +59,7 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contrib
 
 ## Code of conduct
 
-Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
+Participation in this repository is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 # Development
 

@@ -108,7 +108,7 @@
 
 ### Implementation for User Story 3
 
-- [ ] T035 [US3] Implement structured failure payload (`runId,targetId,httpStatus,reproCommand`) in kubernetes/spec/support/e2e/failure_reporter.rb
+- [ ] T035 [US3] Implement structured failure payload (`runId,targetId,errorType,httpStatus,reproCommand`) in kubernetes/spec/support/e2e/failure_reporter.rb
 - [ ] T036 [P] [US3] Implement reproducible command builder in kubernetes/spec/support/e2e/repro_command_builder.rb
 - [ ] T037 [US3] Implement package guard script for gem contents in scripts/e2e/check-gem-package
 - [ ] T038 [US3] Add `e2e:package_guard` rake task in kubernetes/Rakefile
@@ -149,7 +149,7 @@
 ### Within Each User Story
 
 - テストタスクを先に作成し、実装前に失敗を確認
-- Target/Model 相当ファイル -> mode/service 実装 -> CLI/Rake 統合の順で進める
+- `Target/Model` 相当ファイル -> `mode/service` 実装 -> `CLI`/`Rake` 統合の順で進める
 
 ### Dependency Graph
 

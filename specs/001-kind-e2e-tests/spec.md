@@ -21,7 +21,7 @@
 2. 実行後は作成リソースとクラスターをクリーンアップできること。
 
 ### FR-2: Selective Targeting by API Scope
-1. API グループ、バージョン、リソース、操作（create/read/update/delete/list/watch）でテスト対象を指定できること。
+1. API グループ、バージョン、リソース、操作（create/get/list/update/patch/delete/watch）でテスト対象を指定できること。
 2. 指定対象だけを単体で実行できること。
 
 ### FR-3: Changed-only Test Mode

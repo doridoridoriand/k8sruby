@@ -4,6 +4,7 @@
 - Docker
 - kind
 - kubectl
+- ripgrep (`rg`)
 - Ruby 3.3+
 - Bundler
 
@@ -30,7 +31,7 @@ E2E_MODE=targeted E2E_TARGETS='core/v1/pods:create,apps/v1/deployments:update' b
 ### 3) Changed-only E2E
 ```bash
 cd kubernetes
-E2E_MODE=changed BASE_REF=origin/master bundle exec rspec spec/e2e
+E2E_MODE=changed BASE_REF=origin/HEAD bundle exec rspec spec/e2e
 ```
 
 ## Expected output

@@ -6,6 +6,8 @@ info:
     Contract for orchestrating kind-backed E2E runs with full/targeted/changed modes.
 servers:
   - url: http://localhost:8081
+security:
+  - bearerAuth: []
 paths:
   /test-runs:
     post:
@@ -39,6 +41,10 @@ paths:
                 $ref: '#/components/schemas/TestRun'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /test-runs/{runId}/results:
     get:
       summary: Get run results and failure artifacts
@@ -57,8 +63,15 @@ paths:
                     $ref: '#/components/schemas/TestRun'
                   failures:
                     type: array
+                    maxItems: 1000
                     items:
                       $ref: '#/components/schemas/FailureArtifact'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /catalog/targets:
     get:
       summary: List available test targets
@@ -103,6 +116,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResolveChangesResponse'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     RunId:
       in: path
@@ -112,20 +130,54 @@ components:
         type: string
   schemas:
     StartRunRequest:
+      oneOf:
+        - $ref: '#/components/schemas/StartRunFullRequest'
+        - $ref: '#/components/schemas/StartRunTargetedRequest'
+        - $ref: '#/components/schemas/StartRunChangedRequest'
+      discriminator:
+        propertyName: mode
+        mapping:
+          full: '#/components/schemas/StartRunFullRequest'
+          targeted: '#/components/schemas/StartRunTargetedRequest'
+          changed: '#/components/schemas/StartRunChangedRequest'
+    StartRunFullRequest:
       type: object
       required: [mode]
+      additionalProperties: false
       properties:
         mode:
           type: string
-          enum: [full, targeted, changed]
+          enum: [full]
+        fallbackStrategy:
+          type: string
+          enum: [minimal-smoke, full]
+          default: minimal-smoke
+    StartRunTargetedRequest:
+      type: object
+      required: [mode, targets]
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+          enum: [targeted]
         targets:
           type: array
           items:
             type: string
-          description: required when mode=targeted
+        fallbackStrategy:
+          type: string
+          enum: [minimal-smoke, full]
+          default: minimal-smoke
+    StartRunChangedRequest:
+      type: object
+      required: [mode, baseRef]
+      additionalProperties: false
+      properties:
+        mode:
+          type: string
+          enum: [changed]
         baseRef:
           type: string
-          description: required when mode=changed
         fallbackStrategy:
           type: string
           enum: [minimal-smoke, full]
@@ -221,3 +273,13 @@ components:
           type: string
         logPath:
           type: string
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: test run was not found

@@ -61,7 +61,7 @@
 ### Implementation for User Story 1
 
 - [x] T019 [P] [US1] Implement core/v1 Pod target definitions in kubernetes/spec/support/e2e/targets/core_v1_pods.rb
-- [ ] T020 [P] [US1] Implement apps/v1 Deployment target definitions for selective checks in kubernetes/spec/support/e2e/targets/apps_v1_deployments.rb
+- [x] T020 [P] [US1] Implement apps/v1 Deployment target definitions for selective checks in kubernetes/spec/support/e2e/targets/apps_v1_deployments.rb
 - [ ] T021 [US1] Implement targeted run context (`E2E_TARGETS`) resolution in kubernetes/spec/support/e2e/run_context.rb
 - [ ] T022 [US1] Implement mode dispatcher logic for `targeted` and `changed` in kubernetes/spec/support/e2e/mode_dispatcher.rb
 - [ ] T023 [US1] Implement CLI option parsing for `--mode targeted|changed` in scripts/e2e/run-e2e

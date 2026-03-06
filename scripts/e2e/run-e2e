@@ -103,12 +103,23 @@ fi
 
 export E2E_MODE="${mode}"
 export E2E_FALLBACK_STRATEGY="${fallback}"
-if [[ -n "${targets}" ]]; then
-  export E2E_TARGETS="${targets}"
-fi
-if [[ -n "${base_ref}" ]]; then
-  export BASE_REF="${base_ref}"
-fi
+
+case "${mode}" in
+  full)
+    unset E2E_TARGETS
+    unset BASE_REF
+    ;;
+  targeted)
+    export E2E_TARGETS="${targets}"
+    unset BASE_REF
+    ;;
+  changed)
+    unset E2E_TARGETS
+    export BASE_REF="${base_ref}"
+    ;;
+esac
+
+echo "[run-e2e] mode=${E2E_MODE} fallback=${E2E_FALLBACK_STRATEGY}" >&2
 
 cd "${REPO_ROOT}/kubernetes"
 if [[ -n "${BUNDLE_BIN_PATH:-}" ]]; then

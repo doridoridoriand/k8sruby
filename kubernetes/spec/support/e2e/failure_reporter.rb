@@ -54,15 +54,17 @@ module SpecSupport
       private
 
       def build_artifact(target_id:, error:, repro_command:, http_status:, response_excerpt:, log_path:)
-        {
+        artifact = {
           "runId" => run_id,
-          "targetId" => target_id,
+          "targetId" => require_present_string!(target_id, "target_id"),
           "errorType" => error_type(error),
-          "httpStatus" => http_status,
+          "httpStatus" => normalize_http_status(http_status, error),
           "responseExcerpt" => truncate_excerpt(response_excerpt || extract_error_excerpt(error)),
-          "reproCommand" => repro_command,
+          "reproCommand" => require_present_string!(repro_command, "repro_command"),
           "logPath" => log_path
-        }.compact
+        }
+        artifact.delete("logPath") if artifact["logPath"].nil?
+        artifact
       end
 
       def write_single_artifact(artifact)
@@ -103,6 +105,25 @@ module SpecSupport
 
       def default_run_id
         Time.now.utc.strftime("run-%Y%m%d%H%M%S")
+      end
+
+      def normalize_http_status(http_status, error)
+        return Integer(http_status) unless http_status.nil?
+
+        if error.respond_to?(:code)
+          Integer(error.code)
+        else
+          nil
+        end
+      rescue ArgumentError, TypeError
+        nil
+      end
+
+      def require_present_string!(value, field_name)
+        text = value.to_s.strip
+        raise ArgumentError, "#{field_name} must not be empty" if text.empty?
+
+        text
       end
     end
   end

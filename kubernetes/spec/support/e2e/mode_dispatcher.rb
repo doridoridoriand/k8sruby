@@ -4,6 +4,7 @@ require_relative "change_resolver"
 require_relative "run_context"
 require_relative "target_catalog"
 require_relative "targets/apps_v1_deployments"
+require_relative "targets/batch_v1_jobs"
 require_relative "targets/core_v1_pods"
 
 module SpecSupport
@@ -18,6 +19,22 @@ module SpecSupport
         keyword_init: true
       )
 
+      OPERATION_ORDER = {
+        "create" => 10,
+        "get" => 20,
+        "list" => 30,
+        "update" => 40,
+        "patch" => 50,
+        "delete" => 60,
+        "watch" => 70
+      }.freeze
+
+      API_GROUP_ORDER = {
+        "core" => 10,
+        "apps" => 20,
+        "batch" => 30
+      }.freeze
+
       attr_reader :target_catalog
 
       def initialize(target_catalog: nil, change_resolver: nil)
@@ -29,6 +46,7 @@ module SpecSupport
         catalog = TargetCatalog.new
         Targets::CoreV1Pods.register!(catalog)
         Targets::AppsV1Deployments.register!(catalog)
+        Targets::BatchV1Jobs.register!(catalog)
         catalog
       end
 
@@ -44,7 +62,7 @@ module SpecSupport
           Selection.new(
             mode: "full",
             requested_targets: [],
-            resolved_targets: target_catalog.ids,
+            resolved_targets: full_execution_targets,
             fallback_used: false,
             reason: nil
           )
@@ -85,6 +103,22 @@ module SpecSupport
           fallback_used: change_set.fallback_used,
           reason: change_set.reason
         )
+      end
+
+      def full_execution_targets
+        target_catalog
+          .all
+          .sort_by do |target|
+            [
+              API_GROUP_ORDER.fetch(target.api_group, 100),
+              target.api_group,
+              target.version,
+              target.resource,
+              OPERATION_ORDER.fetch(target.operation, 100),
+              target.operation
+            ]
+          end
+          .map(&:id)
       end
     end
   end

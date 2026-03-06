@@ -121,16 +121,80 @@ esac
 
 echo "[run-e2e] mode=${E2E_MODE} fallback=${E2E_FALLBACK_STRATEGY}" >&2
 
+build_repro_command() {
+  ruby -I "${REPO_ROOT}/kubernetes/spec" -e '
+    require "support/e2e/repro_command_builder"
+    mode, targets, base_ref, fallback, *extra = ARGV
+    builder = SpecSupport::E2E::ReproCommandBuilder.new
+    params = { mode: mode, fallback_strategy: fallback, rspec_args: extra }
+    params[:targets] = targets.split(",").reject(&:empty?) unless targets.empty?
+    params[:base_ref] = base_ref unless base_ref.empty?
+    puts builder.build(**params)
+  ' "${mode}" "${targets}" "${base_ref}" "${fallback}" "${rspec_args[@]}"
+}
+
+emit_issue_summary() {
+  local rspec_exit_code="$1"
+  local report_file="$2"
+  local repro_command="$3"
+
+  ruby -rjson -e '
+    path, exit_code, mode, fallback, targets, base_ref, repro = ARGV
+    data = File.exist?(path) ? JSON.parse(File.read(path)) : {}
+    summary = data.fetch("summary", {})
+    examples = data.fetch("examples", [])
+    failed = examples.select { |example| example["status"] == "failed" }
+
+    example_count = summary["example_count"] || examples.length
+    failure_count = summary["failure_count"] || failed.length
+    duration = summary["duration"]
+    duration_text = duration.nil? ? "n/a" : format("%.3f", duration.to_f)
+
+    puts "[run-e2e] summary examples=#{example_count} failures=#{failure_count} duration_s=#{duration_text}"
+
+    exit 0 if exit_code.to_i.zero?
+
+    puts "[run-e2e] --- issue-template ---"
+    puts "### E2E Failure Summary"
+    puts "- mode: #{mode}"
+    puts "- fallback: #{fallback}"
+    puts "- targets: #{targets}" unless targets.empty?
+    puts "- base_ref: #{base_ref}" if mode == "changed" && !base_ref.empty?
+    puts "- failed_examples: #{failure_count}"
+    puts "- repro_command: #{repro}"
+
+    unless failed.empty?
+      puts "- failure_examples:"
+      failed.first(5).each do |example|
+        puts "  - #{example["full_description"]}"
+      end
+    end
+
+    puts "[run-e2e] ----------------------"
+  ' "${report_file}" "${rspec_exit_code}" "${mode}" "${fallback}" "${targets}" "${base_ref}" "${repro_command}"
+}
+
+REPORT_DIR="${REPO_ROOT}/kubernetes/tmp/e2e"
+mkdir -p "${REPORT_DIR}"
+REPORT_FILE="${REPORT_DIR}/run-e2e-rspec-${mode}-$$.json"
+
 cd "${REPO_ROOT}/kubernetes"
 if [[ -n "${BUNDLE_BIN_PATH:-}" ]]; then
-  if [[ ${#rspec_args[@]} -gt 0 ]]; then
-    exec rspec spec/e2e "${rspec_args[@]}"
-  fi
-  exec rspec spec/e2e
+  rspec_command=(rspec spec/e2e)
+else
+  rspec_command=(bundle exec rspec spec/e2e)
 fi
 
 if [[ ${#rspec_args[@]} -gt 0 ]]; then
-  exec bundle exec rspec spec/e2e "${rspec_args[@]}"
+  rspec_command+=("${rspec_args[@]}")
 fi
+rspec_command+=(--format json --out "${REPORT_FILE}")
 
-exec bundle exec rspec spec/e2e
+set +e
+"${rspec_command[@]}"
+rspec_exit_code=$?
+set -e
+
+repro_command="$(build_repro_command)"
+emit_issue_summary "${rspec_exit_code}" "${REPORT_FILE}" "${repro_command}"
+exit "${rspec_exit_code}"

@@ -112,7 +112,7 @@
 - [x] T036 [P] [US3] Implement reproducible command builder in kubernetes/spec/support/e2e/repro_command_builder.rb
 - [x] T037 [US3] Implement package guard script for gem contents in scripts/e2e/check-gem-package
 - [x] T038 [US3] Add `e2e:package_guard` rake task in kubernetes/Rakefile
-- [ ] T039 [US3] Add issue-template-friendly summary output in scripts/e2e/run-e2e
+- [x] T039 [US3] Add issue-template-friendly summary output in scripts/e2e/run-e2e
 
 **Checkpoint**: User Story 3 is independently runnable and provides actionable failure feedback + packaging safety
 

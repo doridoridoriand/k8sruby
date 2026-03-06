@@ -85,7 +85,7 @@
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Implement batch/v1 Job target definitions in kubernetes/spec/support/e2e/targets/batch_v1_jobs.rb
+- [x] T028 [P] [US2] Implement batch/v1 Job target definitions in kubernetes/spec/support/e2e/targets/batch_v1_jobs.rb
 - [ ] T029 [US2] Implement full-mode target expansion and execution order in kubernetes/spec/support/e2e/mode_dispatcher.rb
 - [ ] T030 [US2] Implement `--mode full` flow in scripts/e2e/run-e2e
 - [ ] T031 [US2] Add `e2e:full` rake task in kubernetes/Rakefile

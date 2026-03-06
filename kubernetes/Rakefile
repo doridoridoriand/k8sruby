@@ -68,6 +68,20 @@ begin
     task :package_guard do
       run_script.call('check-gem-package')
     end
+
+    desc 'Generate API coverage inventory: rake "e2e:coverage_inventory[specs/002-real-api-e2e-coverage/coverage_inventory.json]"'
+    task :coverage_inventory, [:output, :policy] do |_task, args|
+      output = args[:output].to_s.strip
+      output = ENV['E2E_COVERAGE_OUTPUT'].to_s.strip if output.empty?
+      output = 'specs/002-real-api-e2e-coverage/coverage_inventory.json' if output.empty?
+
+      policy = args[:policy].to_s.strip
+      policy = ENV['E2E_COVERAGE_POLICY'].to_s.strip if policy.empty?
+
+      command_args = ['--output', output]
+      command_args += ['--policy', policy] unless policy.empty?
+      run_script.call('generate-coverage-inventory', {}, *command_args)
+    end
   end
 rescue LoadError
   # no rspec available

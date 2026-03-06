@@ -63,6 +63,11 @@ begin
 
       puts File.read(smoke_file)
     end
+
+    desc 'Verify gem package excludes spec/test/features/docs'
+    task :package_guard do
+      run_script.call('check-gem-package')
+    end
   end
 rescue LoadError
   # no rspec available

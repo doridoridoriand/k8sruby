@@ -4,20 +4,157 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/e2e/map-changes [--help]
+Usage: scripts/e2e/map-changes [options]
 
-Resolve git changes to E2E target selectors (skeleton).
+Resolve git changes to E2E target selectors.
 
-Planned options (implemented in later phase):
+Options:
   --base-ref <git-ref>
+  --head-ref <git-ref>
   --fallback <minimal-smoke|full>
+  --format <text|json>
+  --changed-file <path>   # repeatable, bypasses git diff when provided
+  -h, --help
 USAGE
 }
 
-if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-  usage
-  exit 0
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-echo "map-changes is not implemented yet (Phase 1 skeleton)."
-exit 0
+base_ref="${BASE_REF:-origin/HEAD}"
+head_ref="${HEAD_REF:-HEAD}"
+fallback="${E2E_FALLBACK_STRATEGY:-minimal-smoke}"
+output_format="text"
+changed_files=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --base-ref)
+      [[ $# -ge 2 ]] || { echo "ERROR: --base-ref requires a value" >&2; exit 1; }
+      base_ref="$2"
+      shift 2
+      ;;
+    --base-ref=*)
+      base_ref="${1#*=}"
+      shift
+      ;;
+    --head-ref)
+      [[ $# -ge 2 ]] || { echo "ERROR: --head-ref requires a value" >&2; exit 1; }
+      head_ref="$2"
+      shift 2
+      ;;
+    --head-ref=*)
+      head_ref="${1#*=}"
+      shift
+      ;;
+    --fallback)
+      [[ $# -ge 2 ]] || { echo "ERROR: --fallback requires a value" >&2; exit 1; }
+      fallback="$2"
+      shift 2
+      ;;
+    --fallback=*)
+      fallback="${1#*=}"
+      shift
+      ;;
+    --format)
+      [[ $# -ge 2 ]] || { echo "ERROR: --format requires a value" >&2; exit 1; }
+      output_format="$2"
+      shift 2
+      ;;
+    --format=*)
+      output_format="${1#*=}"
+      shift
+      ;;
+    --changed-file)
+      [[ $# -ge 2 ]] || { echo "ERROR: --changed-file requires a value" >&2; exit 1; }
+      changed_files+=("$2")
+      shift 2
+      ;;
+    --changed-file=*)
+      changed_files+=("${1#*=}")
+      shift
+      ;;
+    *)
+      echo "ERROR: unknown option '$1'" >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "${fallback}" in
+  minimal-smoke|full) ;;
+  *)
+    echo "ERROR: unsupported fallback '${fallback}' (expected minimal-smoke|full)" >&2
+    exit 1
+    ;;
+esac
+
+case "${output_format}" in
+  text|json) ;;
+  *)
+    echo "ERROR: unsupported format '${output_format}' (expected text|json)" >&2
+    exit 1
+    ;;
+esac
+
+changed_files_json="$(
+  if [[ ${#changed_files[@]} -eq 0 ]]; then
+    printf '[]'
+  else
+    printf '%s\n' "${changed_files[@]}" | ruby -rjson -e 'puts JSON.generate($stdin.each_line.map(&:strip).reject(&:empty?))'
+  fi
+)"
+
+export E2E_MAP_BASE_REF="${base_ref}"
+export E2E_MAP_HEAD_REF="${head_ref}"
+export E2E_MAP_FALLBACK="${fallback}"
+export E2E_MAP_FORMAT="${output_format}"
+export E2E_MAP_CHANGED_FILES_JSON="${changed_files_json}"
+
+cd "${REPO_ROOT}/kubernetes"
+ruby -I spec <<'RUBY'
+require "json"
+require "support/e2e/mode_dispatcher"
+require "support/e2e/change_resolver"
+
+base_ref = ENV.fetch("E2E_MAP_BASE_REF")
+head_ref = ENV.fetch("E2E_MAP_HEAD_REF")
+fallback = ENV.fetch("E2E_MAP_FALLBACK")
+format = ENV.fetch("E2E_MAP_FORMAT")
+changed_files = JSON.parse(ENV.fetch("E2E_MAP_CHANGED_FILES_JSON"))
+
+catalog = SpecSupport::E2E::ModeDispatcher.build_default_catalog
+resolver = SpecSupport::E2E::ChangeResolver.new(
+  target_catalog: catalog,
+  fallback_strategy: fallback
+)
+change_set = resolver.resolve(base_ref: base_ref, head_ref: head_ref, changed_files: changed_files.empty? ? nil : changed_files)
+
+payload = {
+  "baseRef" => change_set.base_ref,
+  "headRef" => change_set.head_ref,
+  "changedFiles" => change_set.changed_files,
+  "mappedTargets" => change_set.mapped_targets,
+  "fallbackStrategy" => change_set.fallback_strategy,
+  "fallbackUsed" => change_set.fallback_used,
+  "reason" => change_set.reason
+}
+
+if format == "json"
+  puts JSON.pretty_generate(payload)
+else
+  puts "base_ref: #{payload.fetch('baseRef')}"
+  puts "head_ref: #{payload.fetch('headRef')}"
+  puts "fallback_strategy: #{payload.fetch('fallbackStrategy')}"
+  puts "fallback_used: #{payload.fetch('fallbackUsed')}"
+  puts "reason: #{payload.fetch('reason')}" if payload["reason"]
+  puts "mapped_targets:"
+  payload.fetch("mappedTargets").each do |selector|
+    puts "- #{selector}"
+  end
+end
+RUBY

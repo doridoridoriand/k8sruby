@@ -199,6 +199,17 @@ module SpecSupport
           pod = api.read_namespaced_pod(name, namespace)
           labels = resource_labels(pod)
           raise "patch verification failed for pod #{name}" unless labels["e2e-patched"] == "true"
+        when "update"
+          name = seed_pod(api, namespace: namespace, cleanup: cleanup)
+          pod = api.read_namespaced_pod(name, namespace)
+          api.replace_namespaced_pod(
+            name,
+            namespace,
+            with_updated_label(pod, key: "e2e-updated", value: "true")
+          )
+          pod = api.read_namespaced_pod(name, namespace)
+          labels = resource_labels(pod)
+          raise "update verification failed for pod #{name}" unless labels["e2e-updated"] == "true"
         when "delete"
           name = seed_pod(api, namespace: namespace, cleanup: cleanup)
           api.delete_namespaced_pod(name, namespace, grace_period_seconds: 0)
@@ -235,6 +246,17 @@ module SpecSupport
           deployment = api.read_namespaced_deployment(name, namespace)
           labels = resource_labels(deployment)
           raise "patch verification failed for deployment #{name}" unless labels["e2e-patched"] == "true"
+        when "update"
+          name = seed_deployment(api, namespace: namespace, cleanup: cleanup)
+          deployment = api.read_namespaced_deployment(name, namespace)
+          api.replace_namespaced_deployment(
+            name,
+            namespace,
+            with_updated_label(deployment, key: "e2e-updated", value: "true")
+          )
+          deployment = api.read_namespaced_deployment(name, namespace)
+          labels = resource_labels(deployment)
+          raise "update verification failed for deployment #{name}" unless labels["e2e-updated"] == "true"
         when "delete"
           name = seed_deployment(api, namespace: namespace, cleanup: cleanup)
           api.delete_namespaced_deployment(name, namespace, grace_period_seconds: 0)
@@ -271,6 +293,17 @@ module SpecSupport
           job = api.read_namespaced_job(name, namespace)
           labels = resource_labels(job)
           raise "patch verification failed for job #{name}" unless labels["e2e-patched"] == "true"
+        when "update"
+          name = seed_job(api, namespace: namespace, cleanup: cleanup)
+          job = api.read_namespaced_job(name, namespace)
+          api.replace_namespaced_job(
+            name,
+            namespace,
+            with_updated_label(job, key: "e2e-updated", value: "true")
+          )
+          job = api.read_namespaced_job(name, namespace)
+          labels = resource_labels(job)
+          raise "update verification failed for job #{name}" unless labels["e2e-updated"] == "true"
         when "delete"
           name = seed_job(api, namespace: namespace, cleanup: cleanup)
           api.delete_namespaced_job(name, namespace, grace_period_seconds: 0)
@@ -357,6 +390,22 @@ module SpecSupport
         hash.each_with_object({}) { |(k, v), out| out[k.to_s] = v }
       end
 
+      def with_updated_label(resource, key:, value:)
+        if resource.is_a?(Hash)
+          resource["metadata"] ||= {}
+          resource["metadata"]["labels"] ||= {}
+          resource["metadata"]["labels"][key] = value
+          return resource
+        end
+
+        if resource.respond_to?(:metadata) && resource.metadata
+          resource.metadata.labels ||= {}
+          resource.metadata.labels[key] = value
+        end
+
+        resource
+      end
+
       def api_method_name(parsed_target)
         api_group = parsed_target.fetch(:api_group)
         resource = parsed_target.fetch(:resource)
@@ -366,18 +415,24 @@ module SpecSupport
         when ["core", "pods", "create"] then "CoreV1Api#create_namespaced_pod"
         when ["core", "pods", "get"] then "CoreV1Api#read_namespaced_pod"
         when ["core", "pods", "list"] then "CoreV1Api#list_namespaced_pod"
+        when ["core", "pods", "update"] then "CoreV1Api#replace_namespaced_pod"
         when ["core", "pods", "patch"] then "CoreV1Api#patch_namespaced_pod"
         when ["core", "pods", "delete"] then "CoreV1Api#delete_namespaced_pod"
+        when ["core", "pods", "watch"] then "CoreV1Api#watch_namespaced_pod"
         when ["apps", "deployments", "create"] then "AppsV1Api#create_namespaced_deployment"
         when ["apps", "deployments", "get"] then "AppsV1Api#read_namespaced_deployment"
         when ["apps", "deployments", "list"] then "AppsV1Api#list_namespaced_deployment"
+        when ["apps", "deployments", "update"] then "AppsV1Api#replace_namespaced_deployment"
         when ["apps", "deployments", "patch"] then "AppsV1Api#patch_namespaced_deployment"
         when ["apps", "deployments", "delete"] then "AppsV1Api#delete_namespaced_deployment"
+        when ["apps", "deployments", "watch"] then "AppsV1Api#watch_namespaced_deployment"
         when ["batch", "jobs", "create"] then "BatchV1Api#create_namespaced_job"
         when ["batch", "jobs", "get"] then "BatchV1Api#read_namespaced_job"
         when ["batch", "jobs", "list"] then "BatchV1Api#list_namespaced_job"
+        when ["batch", "jobs", "update"] then "BatchV1Api#replace_namespaced_job"
         when ["batch", "jobs", "patch"] then "BatchV1Api#patch_namespaced_job"
         when ["batch", "jobs", "delete"] then "BatchV1Api#delete_namespaced_job"
+        when ["batch", "jobs", "watch"] then "BatchV1Api#watch_namespaced_job"
         else
           nil
         end

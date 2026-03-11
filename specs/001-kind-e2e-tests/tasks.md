@@ -17,12 +17,12 @@
 
 **Purpose**: E2E 実装のための最小ディレクトリ・実行入口を作る
 
-- [ ] T001 Create E2E directory skeleton in kubernetes/spec/e2e/.gitkeep
-- [ ] T002 [P] Create E2E support directory skeleton in kubernetes/spec/support/e2e/.gitkeep
-- [ ] T003 [P] Create E2E script directory skeleton in scripts/e2e/.gitkeep
-- [ ] T004 Add executable entrypoint skeleton for E2E runner in scripts/e2e/run-e2e
-- [ ] T005 [P] Add executable entrypoint skeleton for change mapping in scripts/e2e/map-changes
-- [ ] T006 [P] Add E2E artifact ignore rules in .gitignore
+- [x] T001 Create E2E directory skeleton in kubernetes/spec/e2e/.gitkeep
+- [x] T002 [P] Create E2E support directory skeleton in kubernetes/spec/support/e2e/.gitkeep
+- [x] T003 [P] Create E2E script directory skeleton in scripts/e2e/.gitkeep
+- [x] T004 Add executable entrypoint skeleton for E2E runner in scripts/e2e/run-e2e
+- [x] T005 [P] Add executable entrypoint skeleton for change mapping in scripts/e2e/map-changes
+- [x] T006 [P] Add E2E artifact ignore rules in .gitignore
 
 ---
 
@@ -32,15 +32,15 @@
 
 **⚠️ CRITICAL**: このフェーズ完了前にユーザーストーリー実装を開始しない
 
-- [ ] T007 Implement test target registry model from TestTarget entity in kubernetes/spec/support/e2e/target_catalog.rb
-- [ ] T008 [P] Implement selector parser/validator (`apiGroup/version/resource:operation`) in kubernetes/spec/support/e2e/target_selector.rb
-- [ ] T009 [P] Implement kind cluster lifecycle manager in kubernetes/spec/support/e2e/cluster_manager.rb
-- [ ] T010 Implement namespace/resource cleanup helper in kubernetes/spec/support/e2e/resource_cleanup.rb
-- [ ] T011 [P] Implement changed-files resolver from ChangeSet entity in kubernetes/spec/support/e2e/change_resolver.rb
-- [ ] T012 [P] Implement failure artifact writer from FailureArtifact entity in kubernetes/spec/support/e2e/failure_reporter.rb
-- [ ] T013 Add baseline smoke target config for fallback mode in kubernetes/spec/support/e2e/smoke_targets.yml
-- [ ] T014 Wire E2E helper loading and mode env defaults in kubernetes/spec/spec_helper.rb
-- [ ] T015 Add reusable Rake task namespace (`e2e:*`) in kubernetes/Rakefile
+- [x] T007 Implement test target registry model from TestTarget entity in kubernetes/spec/support/e2e/target_catalog.rb
+- [x] T008 [P] Implement selector parser/validator (`apiGroup/version/resource:operation`) in kubernetes/spec/support/e2e/target_selector.rb
+- [x] T009 [P] Implement kind cluster lifecycle manager in kubernetes/spec/support/e2e/cluster_manager.rb
+- [x] T010 Implement namespace/resource cleanup helper in kubernetes/spec/support/e2e/resource_cleanup.rb
+- [x] T011 [P] Implement changed-files resolver from ChangeSet entity in kubernetes/spec/support/e2e/change_resolver.rb
+- [x] T012 [P] Implement failure artifact writer from FailureArtifact entity in kubernetes/spec/support/e2e/failure_reporter.rb
+- [x] T013 Add baseline smoke target config for fallback mode in kubernetes/spec/support/e2e/smoke_targets.yml
+- [x] T014 Wire E2E helper loading and mode env defaults in kubernetes/spec/spec_helper.rb
+- [x] T015 Add reusable Rake task namespace (`e2e:*`) in kubernetes/Rakefile
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -54,18 +54,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T016 [P] [US1] Create targeted execution spec for core/v1 Pod create/delete in kubernetes/spec/e2e/core_v1_pods_targeted_spec.rb
-- [ ] T017 [P] [US1] Create changed-mode selection spec for git diff mapping in kubernetes/spec/e2e/changed_mode_selection_spec.rb
-- [ ] T018 [US1] Add fallback behavior spec for unresolved changes (`minimal-smoke|full`) in kubernetes/spec/e2e/changed_mode_selection_spec.rb
+- [x] T016 [P] [US1] Create targeted execution spec for core/v1 Pod create/delete in kubernetes/spec/e2e/core_v1_pods_targeted_spec.rb
+- [x] T017 [P] [US1] Create changed-mode selection spec for git diff mapping in kubernetes/spec/e2e/changed_mode_selection_spec.rb
+- [x] T018 [US1] Add fallback behavior spec for unresolved changes (`minimal-smoke|full`) in kubernetes/spec/e2e/changed_mode_selection_spec.rb
 
 ### Implementation for User Story 1
 
-- [ ] T019 [P] [US1] Implement core/v1 Pod target definitions in kubernetes/spec/support/e2e/targets/core_v1_pods.rb
-- [ ] T020 [P] [US1] Implement apps/v1 Deployment target definitions for selective checks in kubernetes/spec/support/e2e/targets/apps_v1_deployments.rb
-- [ ] T021 [US1] Implement targeted run context (`E2E_TARGETS`) resolution in kubernetes/spec/support/e2e/run_context.rb
-- [ ] T022 [US1] Implement mode dispatcher logic for `targeted` and `changed` in kubernetes/spec/support/e2e/mode_dispatcher.rb
-- [ ] T023 [US1] Implement CLI option parsing for `--mode targeted|changed` in scripts/e2e/run-e2e
-- [ ] T024 [US1] Implement changed-file mapping CLI output in scripts/e2e/map-changes
+- [x] T019 [P] [US1] Implement core/v1 Pod target definitions in kubernetes/spec/support/e2e/targets/core_v1_pods.rb
+- [x] T020 [P] [US1] Implement apps/v1 Deployment target definitions for selective checks in kubernetes/spec/support/e2e/targets/apps_v1_deployments.rb
+- [x] T021 [US1] Implement targeted run context (`E2E_TARGETS`) resolution in kubernetes/spec/support/e2e/run_context.rb
+- [x] T022 [US1] Implement mode dispatcher logic for `targeted` and `changed` in kubernetes/spec/support/e2e/mode_dispatcher.rb
+- [x] T023 [US1] Implement CLI option parsing for `--mode targeted|changed` in scripts/e2e/run-e2e
+- [x] T024 [US1] Implement changed-file mapping CLI output in scripts/e2e/map-changes
 
 **Checkpoint**: User Story 1 is independently runnable and provides fast, scope-limited E2E feedback
 
@@ -79,17 +79,17 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Create full-mode orchestration spec for catalog expansion in kubernetes/spec/e2e/full_mode_regression_spec.rb
-- [ ] T026 [P] [US2] Create apps/v1 Deployment full-mode CRUD E2E spec in kubernetes/spec/e2e/apps_v1_deployments_full_spec.rb
-- [ ] T027 [P] [US2] Create batch/v1 Job full-mode create/list/delete E2E spec in kubernetes/spec/e2e/batch_v1_jobs_full_spec.rb
+- [x] T025 [P] [US2] Create full-mode orchestration spec for catalog expansion in kubernetes/spec/e2e/full_mode_regression_spec.rb
+- [x] T026 [P] [US2] Create apps/v1 Deployment full-mode CRUD E2E spec in kubernetes/spec/e2e/apps_v1_deployments_full_spec.rb
+- [x] T027 [P] [US2] Create batch/v1 Job full-mode create/list/delete E2E spec in kubernetes/spec/e2e/batch_v1_jobs_full_spec.rb
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Implement batch/v1 Job target definitions in kubernetes/spec/support/e2e/targets/batch_v1_jobs.rb
-- [ ] T029 [US2] Implement full-mode target expansion and execution order in kubernetes/spec/support/e2e/mode_dispatcher.rb
-- [ ] T030 [US2] Implement `--mode full` flow in scripts/e2e/run-e2e
-- [ ] T031 [US2] Add `e2e:full` rake task in kubernetes/Rakefile
-- [ ] T032 [US2] Optimize cluster reuse policy for full run in kubernetes/spec/support/e2e/cluster_manager.rb
+- [x] T028 [P] [US2] Implement batch/v1 Job target definitions in kubernetes/spec/support/e2e/targets/batch_v1_jobs.rb
+- [x] T029 [US2] Implement full-mode target expansion and execution order in kubernetes/spec/support/e2e/mode_dispatcher.rb
+- [x] T030 [US2] Implement `--mode full` flow in scripts/e2e/run-e2e
+- [x] T031 [US2] Add `e2e:full` rake task in kubernetes/Rakefile
+- [x] T032 [US2] Optimize cluster reuse policy for full run in kubernetes/spec/support/e2e/cluster_manager.rb
 
 **Checkpoint**: User Story 2 is independently runnable as a pre-release regression gate
 
@@ -103,16 +103,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Create failure artifact emission spec in kubernetes/spec/e2e/failure_artifact_spec.rb
-- [ ] T034 [P] [US3] Create packaging safety guard spec in kubernetes/spec/e2e/packaging_safety_spec.rb
+- [x] T033 [P] [US3] Create failure artifact emission spec in kubernetes/spec/e2e/failure_artifact_spec.rb
+- [x] T034 [P] [US3] Create packaging safety guard spec in kubernetes/spec/e2e/packaging_safety_spec.rb
 
 ### Implementation for User Story 3
 
-- [ ] T035 [US3] Implement structured failure payload (`runId,targetId,errorType,httpStatus,reproCommand`) in kubernetes/spec/support/e2e/failure_reporter.rb
-- [ ] T036 [P] [US3] Implement reproducible command builder in kubernetes/spec/support/e2e/repro_command_builder.rb
-- [ ] T037 [US3] Implement package guard script for gem contents in scripts/e2e/check-gem-package
-- [ ] T038 [US3] Add `e2e:package_guard` rake task in kubernetes/Rakefile
-- [ ] T039 [US3] Add issue-template-friendly summary output in scripts/e2e/run-e2e
+- [x] T035 [US3] Implement structured failure payload (`runId,targetId,errorType,httpStatus,reproCommand`) in kubernetes/spec/support/e2e/failure_reporter.rb
+- [x] T036 [P] [US3] Implement reproducible command builder in kubernetes/spec/support/e2e/repro_command_builder.rb
+- [x] T037 [US3] Implement package guard script for gem contents in scripts/e2e/check-gem-package
+- [x] T038 [US3] Add `e2e:package_guard` rake task in kubernetes/Rakefile
+- [x] T039 [US3] Add issue-template-friendly summary output in scripts/e2e/run-e2e
 
 **Checkpoint**: User Story 3 is independently runnable and provides actionable failure feedback + packaging safety
 
@@ -122,10 +122,10 @@
 
 **Purpose**: 複数ストーリー横断の最終整備
 
-- [ ] T040 [P] Document E2E run modes and selectors in specs/001-kind-e2e-tests/quickstart.md
-- [ ] T041 [P] Add contributor-facing E2E usage guide in CONTRIBUTING.md
-- [ ] T042 Add troubleshooting runbook for flaky kind startup and cleanup in docs/e2e-kind-testing.md
-- [ ] T043 Validate quickstart commands and record reproducible examples in specs/001-kind-e2e-tests/implementation-notes.md
+- [x] T040 [P] Document E2E run modes and selectors in specs/001-kind-e2e-tests/quickstart.md
+- [x] T041 [P] Add contributor-facing E2E usage guide in CONTRIBUTING.md
+- [x] T042 Add troubleshooting runbook for flaky kind startup and cleanup in docs/e2e-kind-testing.md
+- [x] T043 Validate quickstart commands and record reproducible examples in specs/001-kind-e2e-tests/implementation-notes.md
 
 ---
 

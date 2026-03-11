@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+KUBERNETES_DIR="${REPO_ROOT}/kubernetes"
+OUTPUT_DIR="${KUBERNETES_DIR}/tmp/e2e/package-guard"
+
+mkdir -p "${OUTPUT_DIR}"
+GEM_PATH="${OUTPUT_DIR}/kruby-package-guard-$(date +%Y%m%d%H%M%S)-$$.gem"
+
+cleanup() {
+  rm -f "${GEM_PATH}"
+}
+trap cleanup EXIT
+
+(
+  cd "${KUBERNETES_DIR}"
+  gem build kubernetes.gemspec --output "${GEM_PATH}" >/dev/null
+)
+
+if [[ ! -f "${GEM_PATH}" ]]; then
+  echo "ERROR: gem build did not produce output file: ${GEM_PATH}" >&2
+  exit 1
+fi
+
+entries="$(tar -xOf "${GEM_PATH}" data.tar.gz | tar -tz)"
+forbidden="$(printf '%s\n' "${entries}" | ruby -e 'puts STDIN.each_line.grep(/\A(?:spec|test|features|docs)\//)')"
+
+if [[ -n "${forbidden}" ]]; then
+  echo "Package guard failed: forbidden files detected in gem package:" >&2
+  printf '%s\n' "${forbidden}" >&2
+  exit 1
+fi
+
+echo "Package guard passed: no spec/test/features/docs entries in gem package"
+echo "Checked gem artifact (removed after validation): ${GEM_PATH}"

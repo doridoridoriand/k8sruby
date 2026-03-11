@@ -38,3 +38,33 @@ Use paths from project root instead (for example `specs/001-kind-e2e-tests/plan.
 For the standard Kubernetes/OpenAPI upgrade process, use:
 
 - [docs/kubernetes-version-upgrade.md](docs/kubernetes-version-upgrade.md)
+
+## E2E Test Usage
+
+Use the repository-level scripts for all E2E runs:
+
+```bash
+scripts/e2e/run-e2e --mode full
+scripts/e2e/run-e2e --mode targeted --targets 'core/v1/pods:create'
+scripts/e2e/run-e2e --mode changed --base-ref origin/HEAD
+```
+
+Selector format:
+- `apiGroup/version/resource:operation`
+- Example: `apps/v1/deployments:update`
+
+Useful helpers:
+
+```bash
+scripts/e2e/map-changes --base-ref origin/HEAD --format text
+cd kubernetes
+bundle exec rake e2e:full
+bundle exec rake e2e:targeted['core/v1/pods:create']
+bundle exec rake e2e:changed[origin/HEAD]
+bundle exec rake e2e:package_guard
+```
+
+When reporting failures, include:
+- `run-e2e` summary block
+- failure artifact JSON (`runId/targetId/errorType/httpStatus/reproCommand`)
+- exact command used (`reproCommand`)

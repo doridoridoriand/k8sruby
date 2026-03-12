@@ -145,6 +145,11 @@ effective_base_ref="${BASE_REF:-}"
 echo "[run-e2e] mode=${E2E_MODE} fallback=${E2E_FALLBACK_STRATEGY} real_api=${E2E_REAL_API}" >&2
 
 build_repro_command() {
+  local build_args=("${mode}" "${effective_targets}" "${effective_base_ref}" "${fallback}")
+  if [[ ${#rspec_args[@]} -gt 0 ]]; then
+    build_args+=("${rspec_args[@]}")
+  fi
+
   ruby -I "${REPO_ROOT}/kubernetes/spec" -e '
     require "support/e2e/repro_command_builder"
     mode, targets, base_ref, fallback, *extra = ARGV
@@ -153,7 +158,7 @@ build_repro_command() {
     params[:targets] = targets.split(",").reject(&:empty?) unless targets.empty?
     params[:base_ref] = base_ref unless base_ref.empty?
     puts builder.build(**params)
-  ' "${mode}" "${effective_targets}" "${effective_base_ref}" "${fallback}" "${rspec_args[@]}"
+  ' "${build_args[@]}"
 }
 
 emit_issue_summary() {

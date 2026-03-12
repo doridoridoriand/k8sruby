@@ -18,6 +18,8 @@ module SpecSupport
     class Executor
       DELETE_WAIT_TIMEOUT_SECONDS = 20
       DELETE_WAIT_INTERVAL_SECONDS = 0.2
+      CONFLICT_RETRY_ATTEMPTS = 10
+      CONFLICT_RETRY_INTERVAL_SECONDS = 0.2
 
       class UnsupportedTargetError < StandardError; end
 
@@ -195,7 +197,7 @@ module SpecSupport
       end
 
       def execute_pod_operation(operation, namespace:, cleanup:)
-        api = Kubernetes::CoreV1Api.new
+        api = Kubernetes::CoreV1Api.new(build_api_client)
 
         case operation
         when "create"
@@ -224,12 +226,14 @@ module SpecSupport
           raise "patch verification failed for pod #{name}" unless labels["e2e-patched"] == "true"
         when "update"
           name = seed_pod(api, namespace: namespace, cleanup: cleanup)
-          pod = api.read_namespaced_pod(name, namespace)
-          api.replace_namespaced_pod(
-            name,
-            namespace,
-            with_updated_label(pod, key: "e2e-updated", value: "true")
-          )
+          with_conflict_retry do
+            pod = api.read_namespaced_pod(name, namespace)
+            api.replace_namespaced_pod(
+              name,
+              namespace,
+              with_updated_label(pod, key: "e2e-updated", value: "true")
+            )
+          end
           pod = api.read_namespaced_pod(name, namespace)
           labels = resource_labels(pod)
           raise "update verification failed for pod #{name}" unless labels["e2e-updated"] == "true"
@@ -245,7 +249,7 @@ module SpecSupport
       end
 
       def execute_deployment_operation(operation, namespace:, cleanup:)
-        api = Kubernetes::AppsV1Api.new
+        api = Kubernetes::AppsV1Api.new(build_api_client)
 
         case operation
         when "create"
@@ -274,12 +278,14 @@ module SpecSupport
           raise "patch verification failed for deployment #{name}" unless labels["e2e-patched"] == "true"
         when "update"
           name = seed_deployment(api, namespace: namespace, cleanup: cleanup)
-          deployment = api.read_namespaced_deployment(name, namespace)
-          api.replace_namespaced_deployment(
-            name,
-            namespace,
-            with_updated_label(deployment, key: "e2e-updated", value: "true")
-          )
+          with_conflict_retry do
+            deployment = api.read_namespaced_deployment(name, namespace)
+            api.replace_namespaced_deployment(
+              name,
+              namespace,
+              with_updated_label(deployment, key: "e2e-updated", value: "true")
+            )
+          end
           deployment = api.read_namespaced_deployment(name, namespace)
           labels = resource_labels(deployment)
           raise "update verification failed for deployment #{name}" unless labels["e2e-updated"] == "true"
@@ -295,7 +301,7 @@ module SpecSupport
       end
 
       def execute_job_operation(operation, namespace:, cleanup:)
-        api = Kubernetes::BatchV1Api.new
+        api = Kubernetes::BatchV1Api.new(build_api_client)
 
         case operation
         when "create"
@@ -324,12 +330,14 @@ module SpecSupport
           raise "patch verification failed for job #{name}" unless labels["e2e-patched"] == "true"
         when "update"
           name = seed_job(api, namespace: namespace, cleanup: cleanup)
-          job = api.read_namespaced_job(name, namespace)
-          api.replace_namespaced_job(
-            name,
-            namespace,
-            with_updated_label(job, key: "e2e-updated", value: "true")
-          )
+          with_conflict_retry do
+            job = api.read_namespaced_job(name, namespace)
+            api.replace_namespaced_job(
+              name,
+              namespace,
+              with_updated_label(job, key: "e2e-updated", value: "true")
+            )
+          end
           job = api.read_namespaced_job(name, namespace)
           labels = resource_labels(job)
           raise "update verification failed for job #{name}" unless labels["e2e-updated"] == "true"
@@ -473,6 +481,25 @@ module SpecSupport
         error.respond_to?(:code) && error.code.to_i == 404
       end
 
+      def conflict_error?(error)
+        error.respond_to?(:code) && error.code.to_i == 409
+      end
+
+      def with_conflict_retry(attempts: CONFLICT_RETRY_ATTEMPTS)
+        current_attempt = 0
+
+        begin
+          current_attempt += 1
+          yield
+        rescue StandardError => e
+          raise unless conflict_error?(e)
+          raise if current_attempt >= attempts
+
+          sleep CONFLICT_RETRY_INTERVAL_SECONDS
+          retry
+        end
+      end
+
       def api_method_name(parsed_target)
         api_group = parsed_target.fetch(:api_group)
         resource = parsed_target.fetch(:resource)
@@ -511,6 +538,10 @@ module SpecSupport
 
       def elapsed_ms(started_at)
         ((monotonic_time - started_at) * 1000.0).round(2)
+      end
+
+      def build_api_client
+        Kubernetes.new_client_from_config
       end
     end
   end

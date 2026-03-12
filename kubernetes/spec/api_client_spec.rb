@@ -119,15 +119,49 @@ describe Kubernetes::ApiClient do
   end
 
   describe "#object_to_hash" do
-    it 'ignores nils and includes empty arrays' do
-      # uncomment below to test object_to_hash for model
-      # api_client = Kubernetes::ApiClient.new
-      # _model = Kubernetes::ModelName.new
-      # update the model attribute below
-      # _model.id = 1
-      # update the expected value (hash) below
-      # expected = {id: 1, name: '', tags: []}
-      # expect(api_client.object_to_hash(_model)).to eq(expected)
+    let(:api_client) { Kubernetes::ApiClient.new }
+
+    it 'serializes nested time-like values as ISO8601 strings' do
+      timestamp = Time.utc(2026, 3, 12, 4, 45, 19)
+      date = Date.new(2026, 3, 12)
+      payload = double(
+        'payload',
+        to_hash: {
+          'metadata' => {
+            'creationTimestamp' => timestamp
+          },
+          'status' => {
+            'lastProbeTime' => timestamp
+          },
+          'items' => [
+            { 'scheduledFor' => timestamp }
+          ],
+          'businessDate' => date
+        }
+      )
+
+      expect(api_client.object_to_hash(payload)).to eq(
+        'metadata' => { 'creationTimestamp' => '2026-03-12T04:45:19Z' },
+        'status' => { 'lastProbeTime' => '2026-03-12T04:45:19Z' },
+        'items' => [{ 'scheduledFor' => '2026-03-12T04:45:19Z' }],
+        'businessDate' => '2026-03-12'
+      )
+    end
+
+    it 'emits ISO8601 timestamps in JSON request bodies' do
+      timestamp = Time.utc(2026, 3, 12, 4, 45, 19)
+      payload = double(
+        'payload',
+        to_hash: {
+          'metadata' => {
+            'creationTimestamp' => timestamp
+          }
+        }
+      )
+
+      expect(api_client.object_to_http_body(payload)).to eq(
+        '{"metadata":{"creationTimestamp":"2026-03-12T04:45:19Z"}}'
+      )
     end
   end
 

@@ -7,6 +7,7 @@ require_relative "cluster_manager"
 require_relative "coverage_reporter"
 require_relative "failure_reporter"
 require_relative "factories"
+require_relative "kind_version_resolver"
 require_relative "mode_dispatcher"
 require_relative "repro_command_builder"
 require_relative "resource_cleanup"
@@ -18,6 +19,8 @@ module SpecSupport
     class Executor
       DELETE_WAIT_TIMEOUT_SECONDS = 20
       DELETE_WAIT_INTERVAL_SECONDS = 0.2
+      CONFLICT_RETRY_ATTEMPTS = 10
+      CONFLICT_RETRY_INTERVAL_SECONDS = 0.2
 
       class UnsupportedTargetError < StandardError; end
 
@@ -38,7 +41,7 @@ module SpecSupport
                      failure_reporter: nil,
                      coverage_output_path: ENV["E2E_COVERAGE_REPORT"])
         @mode_dispatcher = mode_dispatcher
-        @run_id = run_id || Time.now.utc.strftime("run-%Y%m%d%H%M%S")
+        @run_id = run_id || default_run_id
         @cluster_manager = cluster_manager
         @failure_reporter = failure_reporter || FailureReporter.new(run_id: @run_id)
         @coverage_output_path = coverage_output_path.to_s.empty? ? nil : coverage_output_path
@@ -56,7 +59,10 @@ module SpecSupport
         )
         coverage_reporter.start!(resolved_targets: selection.resolved_targets)
 
-        cluster_manager = @cluster_manager || ClusterManager.new(mode: context.mode)
+        cluster_manager = @cluster_manager || ClusterManager.new(
+          mode: context.mode,
+          kubernetes_version: context.kubernetes_version
+        )
         run_error = nil
         failure_summary_path = nil
         coverage_path = nil
@@ -94,6 +100,7 @@ module SpecSupport
         result = {
           "runId" => run_id,
           "mode" => selection.mode,
+          "kubernetesVersion" => context.kubernetes_version,
           "requestedTargets" => selection.requested_targets,
           "resolvedTargets" => selection.resolved_targets,
           "fallbackUsed" => selection.fallback_used,
@@ -154,7 +161,8 @@ module SpecSupport
             mode: context.mode,
             targets: [target_id],
             base_ref: context.base_ref,
-            fallback_strategy: context.fallback_strategy
+            fallback_strategy: context.fallback_strategy,
+            kubernetes_version: context.kubernetes_version
           )
           @failure_reporter.record(
             target_id: target_id,
@@ -195,7 +203,7 @@ module SpecSupport
       end
 
       def execute_pod_operation(operation, namespace:, cleanup:)
-        api = Kubernetes::CoreV1Api.new
+        api = Kubernetes::CoreV1Api.new(build_api_client)
 
         case operation
         when "create"
@@ -224,12 +232,14 @@ module SpecSupport
           raise "patch verification failed for pod #{name}" unless labels["e2e-patched"] == "true"
         when "update"
           name = seed_pod(api, namespace: namespace, cleanup: cleanup)
-          pod = api.read_namespaced_pod(name, namespace)
-          api.replace_namespaced_pod(
-            name,
-            namespace,
-            with_updated_label(pod, key: "e2e-updated", value: "true")
-          )
+          with_conflict_retry do
+            pod = api.read_namespaced_pod(name, namespace)
+            api.replace_namespaced_pod(
+              name,
+              namespace,
+              with_updated_label(pod, key: "e2e-updated", value: "true")
+            )
+          end
           pod = api.read_namespaced_pod(name, namespace)
           labels = resource_labels(pod)
           raise "update verification failed for pod #{name}" unless labels["e2e-updated"] == "true"
@@ -245,7 +255,7 @@ module SpecSupport
       end
 
       def execute_deployment_operation(operation, namespace:, cleanup:)
-        api = Kubernetes::AppsV1Api.new
+        api = Kubernetes::AppsV1Api.new(build_api_client)
 
         case operation
         when "create"
@@ -274,12 +284,14 @@ module SpecSupport
           raise "patch verification failed for deployment #{name}" unless labels["e2e-patched"] == "true"
         when "update"
           name = seed_deployment(api, namespace: namespace, cleanup: cleanup)
-          deployment = api.read_namespaced_deployment(name, namespace)
-          api.replace_namespaced_deployment(
-            name,
-            namespace,
-            with_updated_label(deployment, key: "e2e-updated", value: "true")
-          )
+          with_conflict_retry do
+            deployment = api.read_namespaced_deployment(name, namespace)
+            api.replace_namespaced_deployment(
+              name,
+              namespace,
+              with_updated_label(deployment, key: "e2e-updated", value: "true")
+            )
+          end
           deployment = api.read_namespaced_deployment(name, namespace)
           labels = resource_labels(deployment)
           raise "update verification failed for deployment #{name}" unless labels["e2e-updated"] == "true"
@@ -295,7 +307,7 @@ module SpecSupport
       end
 
       def execute_job_operation(operation, namespace:, cleanup:)
-        api = Kubernetes::BatchV1Api.new
+        api = Kubernetes::BatchV1Api.new(build_api_client)
 
         case operation
         when "create"
@@ -324,12 +336,14 @@ module SpecSupport
           raise "patch verification failed for job #{name}" unless labels["e2e-patched"] == "true"
         when "update"
           name = seed_job(api, namespace: namespace, cleanup: cleanup)
-          job = api.read_namespaced_job(name, namespace)
-          api.replace_namespaced_job(
-            name,
-            namespace,
-            with_updated_label(job, key: "e2e-updated", value: "true")
-          )
+          with_conflict_retry do
+            job = api.read_namespaced_job(name, namespace)
+            api.replace_namespaced_job(
+              name,
+              namespace,
+              with_updated_label(job, key: "e2e-updated", value: "true")
+            )
+          end
           job = api.read_namespaced_job(name, namespace)
           labels = resource_labels(job)
           raise "update verification failed for job #{name}" unless labels["e2e-updated"] == "true"
@@ -443,7 +457,8 @@ module SpecSupport
           mode: context.mode,
           targets: selection.mode == "targeted" ? selection.requested_targets : nil,
           base_ref: selection.mode == "changed" ? context.base_ref : nil,
-          fallback_strategy: context.fallback_strategy
+          fallback_strategy: context.fallback_strategy,
+          kubernetes_version: context.kubernetes_version
         )
       end
 
@@ -471,6 +486,25 @@ module SpecSupport
 
       def not_found_error?(error)
         error.respond_to?(:code) && error.code.to_i == 404
+      end
+
+      def conflict_error?(error)
+        error.respond_to?(:code) && error.code.to_i == 409
+      end
+
+      def with_conflict_retry(attempts: CONFLICT_RETRY_ATTEMPTS)
+        current_attempt = 0
+
+        begin
+          current_attempt += 1
+          yield
+        rescue StandardError => e
+          raise unless conflict_error?(e)
+          raise if current_attempt >= attempts
+
+          sleep CONFLICT_RETRY_INTERVAL_SECONDS
+          retry
+        end
       end
 
       def api_method_name(parsed_target)
@@ -511,6 +545,15 @@ module SpecSupport
 
       def elapsed_ms(started_at)
         ((monotonic_time - started_at) * 1000.0).round(2)
+      end
+
+      def build_api_client
+        Kubernetes.new_client_from_config
+      end
+
+      def default_run_id
+        version_slug = KindVersionResolver.version_slug(ENV.fetch("E2E_KUBERNETES_VERSION", KindVersionResolver.default_kubernetes_version))
+        "run-#{Time.now.utc.strftime('%Y%m%d%H%M%S')}-#{version_slug}-p#{Process.pid}"
       end
     end
   end

@@ -360,9 +360,22 @@ module Kubernetes
     # @param [Object] obj object to be converted into JSON string
     # @return [String] JSON string representation of the object
     def object_to_hash(obj)
-      if obj.respond_to?(:to_hash)
-        obj.to_hash
+      sanitize_for_serialization(obj)
+    end
+
+    def sanitize_for_serialization(obj)
+      case obj
+      when Array
+        obj.map { |item| sanitize_for_serialization(item) }
+      when Hash
+        obj.each_with_object({}) do |(key, value), result|
+          result[key] = sanitize_for_serialization(value)
+        end
+      when Time, Date, DateTime
+        obj.iso8601
       else
+        return sanitize_for_serialization(obj.to_hash) if obj.respond_to?(:to_hash)
+
         obj
       end
     end

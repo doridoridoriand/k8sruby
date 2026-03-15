@@ -39,6 +39,15 @@ For the standard Kubernetes/OpenAPI upgrade process, use:
 
 - [docs/kubernetes-version-upgrade.md](docs/kubernetes-version-upgrade.md)
 
+## Release Workflow
+
+For changelog-driven releases and release-tag handling, use:
+
+- [CHANGELOG.md](CHANGELOG.md)
+- [docs/release-process.md](docs/release-process.md)
+
+Release tags must use `vX.Y.Z`, and the tag must match `kubernetes/lib/kubernetes/version.rb`.
+
 ## E2E Test Usage
 
 Use the repository-level scripts for all E2E runs:

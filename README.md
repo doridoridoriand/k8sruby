@@ -9,6 +9,12 @@ Ruby client for the [kubernetes](http://kubernetes.io/) API.
 - It is now maintained as a community-driven fork to keep pace with current Kubernetes API versions.
 - This fork includes community-maintained modifications (packaging, compatibility fixes, CI/runtime requirements, and docs) in addition to OpenAPI-generated code.
 
+## Release Tracking
+
+- User-visible changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+- Release tags use the format `vX.Y.Z`.
+- Pushed release tags automatically publish a GitHub Release using the matching changelog section.
+
 ## Generation Policy
 
 - Like other official Kubernetes clients, this client is generated from Kubernetes OpenAPI specifications.
@@ -18,11 +24,11 @@ Ruby client for the [kubernetes](http://kubernetes.io/) API.
 
 | Kubernetes version | Kubernetes API (OpenAPI) | Client gem version |
 | --- | --- | --- |
-| 1.31 | release-1.35 | 1.35.0.3 |
-| 1.32 | release-1.35 | 1.35.0.3 |
-| 1.33 | release-1.35 | 1.35.0.3 |
-| 1.34 | release-1.35 | 1.35.0.3 |
-| 1.35 | release-1.35 | 1.35.0.3 |
+| 1.31 | release-1.35 | 1.35.0.4 |
+| 1.32 | release-1.35 | 1.35.0.4 |
+| 1.33 | release-1.35 | 1.35.0.4 |
+| 1.34 | release-1.35 | 1.35.0.4 |
+| 1.35 | release-1.35 | 1.35.0.4 |
 
 ## Requirements
 
